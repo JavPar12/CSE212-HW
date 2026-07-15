@@ -1,16 +1,16 @@
 ﻿/*
  * CSE 212 Lesson 6C 
- * 
- * This code will analyze the NBA basketball data and create a table showing
+ * * This code will analyze the NBA basketball data and create a table showing
  * the players with the top 10 career points.
- * 
- * Note about columns:
+ * * Note about columns:
  * - Player ID is in column 0
  * - Points is in column 8
- * 
- * Each row represents the player's stats for a single season with a single team.
+ * * Each row represents the player's stats for a single season with a single team.
  */
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualBasic.FileIO;
 
 public class Basketball
@@ -23,14 +23,30 @@ public class Basketball
         reader.TextFieldType = FieldType.Delimited;
         reader.SetDelimiters(",");
         reader.ReadFields(); // ignore header row
+        
         while (!reader.EndOfData) {
             var fields = reader.ReadFields()!;
             var playerId = fields[0];
             var points = int.Parse(fields[8]);
+
+            // If the player is already in the dictionary, add the current season's points to their total
+            if (players.ContainsKey(playerId)) {
+                players[playerId] += points;
+            }
+            // If it is the first time seeing this player, initialize their entry in the dictionary
+            else {
+                players[playerId] = points;
+            }
         }
 
-        Console.WriteLine($"Players: {{{string.Join(", ", players)}}}");
+        // Convert the dictionary to an array, sort by points in descending order, and extract the top 10
+        var topPlayers = players.ToArray()
+            .OrderByDescending(player => player.Value)
+            .Take(10)
+            .Select(player => $"{player.Key} = {player.Value}")
+            .ToArray();
 
-        var topPlayers = new string[10];
+        // Print the final result in the format expected by the template
+        Console.WriteLine($"Players: {{{string.Join(", ", topPlayers)}}}");
     }
 }
